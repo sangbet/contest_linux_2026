@@ -62,7 +62,6 @@ def main():
                 print("无法读取画面")
                 break
 
-            # 计算 FPS
             curr_time = time.time()
             #-----处理代码开始-----
 

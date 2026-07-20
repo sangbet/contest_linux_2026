@@ -11,7 +11,7 @@ def main():
     try:
         # --- 初始化摄像头 ---
         print("正在初始化相机...")
-        cap = cv2.VideoCapture(10)
+        cap = cv2.VideoCapture(3)
         
         if not cap.isOpened():
             print("无法打开相机！")
@@ -25,8 +25,8 @@ def main():
         cap.set(cv2.CAP_PROP_FPS, 30)
 
         # --- 创建并启动推流服务 ---
-        streamer = VideoStreamer(port=5000)
-        streamer.start()
+        # streamer = VideoStreamer(port=5000)
+        # streamer.start()
 
         # --- 主循环 ---
         print("正在采集并推流")
@@ -56,12 +56,12 @@ def main():
                         (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
 
             # 推流
-            streamer.update_frame(frame)
+            # streamer.update_frame(frame)
             
             # 可选：显示画面（调试用）
-            # cv2.imshow('Camera', frame)
-            # if cv2.waitKey(1) & 0xFF == ord('q'):
-            #     break
+            cv2.imshow('Camera', frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     except KeyboardInterrupt:
         print("\n用户中断")
@@ -76,10 +76,10 @@ def main():
             cap.release()
             print("相机已释放")
             
-        print("正在停止 Web 服务...")
-        if streamer is not None:
-            streamer.stop()
-            print("Web 服务已停止")
+        # print("正在停止 Web 服务...")
+        # if streamer is not None:
+        #     streamer.stop()
+        #     print("Web 服务已停止")
             
         print("程序已完全退出")
 
