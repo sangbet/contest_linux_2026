@@ -10,7 +10,7 @@ import time
 import threading
 from datetime import datetime
 from imu.read_imu import *
-from GPIO.UART.uart import ThreadedSerial  # 导入你提供的类
+from uart import ThreadedSerial  # 导入你提供的类
 
 
 # ==================================================

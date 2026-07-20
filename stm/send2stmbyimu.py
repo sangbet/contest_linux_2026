@@ -1,16 +1,14 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-基于 ThreadedSerial 的主函数 + 回调函数
-- 主线程: 持续向 STM32 发送传感器数据 (根据工作状态调整发送策略)
-- 回调函数: 解析 STM32 发来的指令, 改变上位机工作状态
-"""
+import sys
+import os
+# 将项目根目录（contest_linux_2026）添加到 sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 import time
 import threading
 from datetime import datetime
 from imu.read_imu import *
-from GPIO.UART.uart import ThreadedSerial  # 导入你提供的类
+from uart import ThreadedSerial  # 导入你提供的类
 
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas
@@ -94,7 +92,7 @@ def main():
     BAUD = 115200
 
 
-    serial = i2c(port=3, address=0x3C)   # 常见树莓派配置
+    serial = i2c(port=3, address=0x3C)   
     device = ssd1306(serial, rotate=0)
     device.contrast(100)  #调整对比度（亮度）
 
@@ -131,7 +129,7 @@ def main():
             # ----- 根据工作状态决定发送策略 -----
             if state == "NORMAL":
                 ser.send(f"{sensor_data[0]} {sensor_data[1]}\n")
-                time.sleep(0.1)        # 500ms 一次
+                time.sleep(0.02)        # 500ms 一次
 
             elif state == "ALARM":
                 ser.send(f"ALARM:{sensor_data}\n")
