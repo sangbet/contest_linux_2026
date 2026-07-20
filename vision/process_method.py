@@ -34,5 +34,7 @@ def FindCounter_cv2(img):
         if M["m00"] != 0:
             cx,cy = int(M["m10"]/M["m00"]),int(M["m01"]/M["m00"])
             cv2.circle(img,(cx,cy),3,(0,0,255),2,0)
+    else:
+        cx,cy = None,None
     
-    return img
+    return img,cx,cy

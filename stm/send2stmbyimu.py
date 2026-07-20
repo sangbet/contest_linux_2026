@@ -8,7 +8,7 @@ import time
 import threading
 from datetime import datetime
 from imu.read_imu import *
-from uart import ThreadedSerial  # 导入你提供的类
+from stm.uart import ThreadedSerial  # 导入你提供的类
 
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas

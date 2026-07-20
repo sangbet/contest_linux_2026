@@ -3,17 +3,28 @@ import os
 import numpy as np
 import cv2
 import time
+import threading
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 #-----导入个人包-----
 from vision.web_server import VideoStreamer
 from vision.process_method import *
+from stm.uart import ThreadedSerial
+from stm.send2stmbyimu import get_state,set_state,on_stm32_data_received
 
 # work_state = "NORMAL"
 # state_lock = threading.Lock()
 
 def main():
+    #-----串口设置-----
+    PORT = "/dev/ttyS3"
+    BAUD = 115200
+
+    #-----摄像机设置-----
     cap = None
     streamer = None
+
+    #-----目标位置-----
+    target_x , target_y = 0 , 0
 
     try:
         # --- 初始化摄像头 ---
@@ -25,7 +36,10 @@ def main():
             return
             
         print("相机启动成功")
-        
+
+        ser = ThreadedSerial(port=PORT, baudrate=BAUD, callback=on_stm32_data_received)
+        ser.start()   # 启动后台接收线程
+
         # 设置摄像头参数（可选）
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -52,7 +66,17 @@ def main():
             curr_time = time.time()
             #-----处理代码开始-----
 
-            frame = FindCounter_cv2(frame)
+            frame,target_x,target_y = FindCounter_cv2(frame)
+            if target_x is not None:
+                target_x ,target_y = target_x - (640/2),target_y - (480/2)
+                # print(f"{target_x},{target_y}")
+                if(abs(target_x)<10):target_x = 0
+                if(abs(target_y)<10):target_y = 0
+                ser.send(f"{target_x/2} {-target_y/1.5}\n")
+            else:
+                # print("do not find target")
+                ser.send(f"{0} {0}\n")
+
 
             #-----处理代码结束-----
             fps = 1 / (curr_time - last_time) * 0.2 + fps * 0.8
