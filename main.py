@@ -24,7 +24,7 @@ def main():
     streamer = None
 
     #-----目标位置-----
-    target_x , target_y = 0 , 0
+    error_x , error_y = 0 , 0
 
     try:
         # --- 初始化摄像头 ---
@@ -65,13 +65,13 @@ def main():
             curr_time = time.time()
             #-----处理代码开始-----
 
-            frame,target_x,target_y = FindCounter_cv2(frame)
-            if target_x is not None:
-                target_x ,target_y = target_x - (640/2),target_y - (480/2)
-                # print(f"{target_x},{target_y}")
-                if(abs(target_x)<10):target_x = 0
-                if(abs(target_y)<10):target_y = 0
-                ser.send(f"{target_x/2} {-target_y/1.5}\n")
+            frame,error_x,error_y = FindCounter_cv2(frame)
+            if error_x is not None:
+                error_x ,error_y = error_x - (640/2),error_y - (480/2)
+                # print(f"{error_x},{error_y}")
+                if(abs(error_x)<10):error_x = 0
+                if(abs(error_y)<10):error_y = 0
+                ser.send(f"{error_x/2} {-error_y/1.5}\n")
             else:
                 # print("do not find target")
                 ser.send(f"{0} {0}\n")
