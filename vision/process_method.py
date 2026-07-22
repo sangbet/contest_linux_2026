@@ -38,3 +38,34 @@ def FindCounter_cv2(img):
         cx,cy = None,None
     
     return img,cx,cy
+
+def FindCircle_cv2(img):
+    img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    img_blur = cv2.GaussianBlur(img_gray,(9,9),2)
+
+    # Hough Circle Transform
+    circles = cv2.HoughCircles(img_blur, cv2.HOUGH_GRADIENT, dp=1.2, minDist=50,
+                               param1=100, param2=30, minRadius=10, maxRadius=500)
+
+    best_circle = None
+    max_radius = 0
+    if circles is not None:
+        circles = np.round(circles[0, :]).astype("int")
+        for (cx, cy, r) in circles:
+            if r > max_radius:
+                max_radius = r
+                best_circle = (cx, cy, r)
+
+    if best_circle is not None:
+        cx, cy, r = best_circle
+        cv2.circle(img, (cx, cy), r, (0, 255, 0), 3)
+        cv2.circle(img, (cx, cy), 3, (0, 0, 255), 2)
+        # Draw four points on the circle (0°, 90°, 180°, 270°)
+        for angle in [0, 90, 180, 270]:
+            pt_x = int(cx + r * np.cos(np.radians(angle)))
+            pt_y = int(cy + r * np.sin(np.radians(angle)))
+            cv2.circle(img, (pt_x, pt_y), 6, (255, 0, 0), 0)
+    else:
+        cx, cy = None, None
+
+    return img, cx, cy
