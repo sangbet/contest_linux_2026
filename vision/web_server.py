@@ -40,7 +40,7 @@ class VideoStreamer:
                     html = """
                     <html>
                       <head>
-                        <title>OpenNI2 视频流</title>
+                        <title>相机视频流</title>
                         <style>
                           body { text-align: center; background: #f0f0f0; margin-top: 40px; }
                           h2 { color: #333; }

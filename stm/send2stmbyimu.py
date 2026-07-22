@@ -49,7 +49,6 @@ def on_stm32_data_received(data):
         text = data.decode('ascii').strip()
     except UnicodeDecodeError:
         print(f"[回调] 收到非ASCII数据: {data.hex(' ').upper()}")
-        return
 
     # 如果一次收到多条指令 (用换行分隔), 逐条处理
     messages = text.split('\n')
@@ -92,9 +91,9 @@ def main():
     BAUD = 115200
 
 
-    serial = i2c(port=3, address=0x3C)   
-    device = ssd1306(serial, rotate=0)
-    device.contrast(100)  #调整对比度（亮度）
+    # serial = i2c(port=3, address=0x3C)   
+    # device = ssd1306(serial, rotate=0)
+    # device.contrast(100)  #调整对比度（亮度）
 
     # 创建串口实例, 注册回调函数
     ser = ThreadedSerial(port=PORT, baudrate=BAUD, callback=on_stm32_data_received)
@@ -121,9 +120,9 @@ def main():
             # ----- 读取传感器 -----
             data = get_data(spi)
             sensor_data = [data['gyro_z'] - error[0],data['gyro_y']-error[1]]
-            with canvas(device) as draw:
-                draw.text((0, 0), f"X:{sensor_data[0]:.5f}", fill="white")
-                draw.text((0, 0), f"X:{sensor_data[1]:.5f}", fill="white")
+            # with canvas(device) as draw:
+            #     draw.text((0, 0), f"X:{sensor_data[0]:.5f}", fill="white")
+            #     draw.text((0, 0), f"X:{sensor_data[1]:.5f}", fill="white")
             if abs(sensor_data[0])<0.5 :sensor_data[0]=0
             if abs(sensor_data[1])<0.5 :sensor_data[1]=0
             # ----- 根据工作状态决定发送策略 -----

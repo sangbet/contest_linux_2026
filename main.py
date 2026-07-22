@@ -23,8 +23,15 @@ def main():
     cap = None
     streamer = None
 
-    #-----目标位置-----
-    target_x , target_y = 0 , 0
+    errorX , errorY = 0 , 0 
+    errorSX , errorSY = 0 , 0
+    errorLX ,errorLY = 0 , 0
+    errorDX , errorDY = 0 , 0
+    width,height = 640,480  #摄像头分辨率
+    realX , realY = 320 , 240
+    kpx , kpy = 2.2 , 2.2
+    kix , kiy = 0 , 0
+    kdx , kdy = 0 , 0
 
     try:
         # --- 初始化摄像头 ---
@@ -41,8 +48,8 @@ def main():
         ser.start()   # 启动后台接收线程
 
         # 设置摄像头参数（可选）
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         cap.set(cv2.CAP_PROP_FPS, 30)
 
         # --- 创建并启动推流服务 ---
@@ -66,25 +73,42 @@ def main():
             curr_time = time.time()
             #-----处理代码开始-----
 
-            frame,target_x,target_y = FindCounter_cv2(frame)
-            if target_x is not None:
-                target_x ,target_y = target_x - (640/2),target_y - (480/2)
-                # print(f"{target_x},{target_y}")
-                if(abs(target_x)<10):target_x = 0
-                if(abs(target_y)<10):target_y = 0
-                ser.send(f"{target_x/2} {-target_y/1.5}\n")
-            else:
-                # print("do not find target")
-                ser.send(f"{0} {0}\n")
+            frame,targetX,targetY = FindCounter_cv2(frame)
 
+
+
+            #-----控制代码开始-----
+            if targetX is not None:
+                errorX = targetX - realX
+                errorY = realY - targetY
+                errorDX = errorX - errorLX
+                errorDY = errorY - errorLY
+                speedX = kpx *  errorX/2  + errorSX * kix + errorDX + kdx
+                speedY = kpy * errorY/1.5 + errorSY * kiy + errorDY + kdy
+                # if(abs(speedX)<2):speedX = 0
+                # if(abs(speedY)<2):speedY = 0
+                if(abs(speedX)>500 or abs(speedY)>500):
+                        errorX , errorY = 0 , 0 
+                        errorSX , errorSY = 0 , 0
+                        errorLX ,errorLY = 0 , 0
+                        errorDX , errorDY = 0 , 0
+                
+                ser.send(f"{speedX} 0\n")
+            else:
+                ser.send(f"{0} {0}\n")
+            
+            errorSX = errorX + errorSX
+            errorSY = errorY + errorSY
+
+            errorLX , errorLY = errorX , errorY
 
             #-----处理代码结束-----
             fps = 1 / (curr_time - last_time) * 0.2 + fps * 0.8
             last_time = curr_time
             
             # 添加 FPS 显示
-            cv2.putText(frame, "fps:{}".format(round(fps, 2)),
-                        (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 2)
+            cv2.putText(frame, "{}".format(round(fps, 1)),
+                        (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
 
             # 推流
             streamer.update_frame(frame)
